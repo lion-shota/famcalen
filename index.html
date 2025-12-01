@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>１２３OAuth認証版 Googleカレンダー連携</title>
+    <title>OAuth認証版 Googleカレンダー連携</title>
 
     <link href='./css/main.min.css' rel='stylesheet' />
     
@@ -17,7 +17,7 @@
     <div id="auth-status" style="text-align: center; margin-bottom: 20px;">
         <p id="status-message">非公開カレンダーの予定を表示するには、Googleアカウントでログインしてアクセスを許可してください。</p>
         
-        <button id="auth-button">
+        <button id="auth-button" onclick="initializeGis()">
             Googleアカウントで予定を読み込む
         </button>
     </div>
@@ -26,7 +26,7 @@
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6/index.global.min.js' defer></script>
     
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6/index.global.min.js' defer></script> 
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6/index.global.min.js' defer></script>
 
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6/locales/ja.global.min.js' defer></script>
 
