@@ -1,27 +1,23 @@
-// ... (CLIENT_ID, CALENDAR_ID, SCOPE の設定値はそのまま維持) ...
-const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com';
-const CALENDAR_ID = 'it.is.shotaime@google.com'; 
-const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
-let calendar = null;
-let accessToken = null;
+// ... (宣言部分は省略) ...
 
 function initializeFullCalendarWhenReady() {
     if (typeof FullCalendar !== 'undefined') {
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-            // 【修正】初期ビューをList形式に切り替え (コア機能)
+            // DayGridプラグインがないため、List形式を推奨
             initialView: 'listWeek', 
             locale: 'ja',
-            // 【修正】プラグインを全て削除 (最小構成)
-            plugins: [], 
+            // 【修正】Google Calendarプラグインを復活
+            plugins: ['googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
                 // 表示形式をListとTimeGridに限定
-                right: 'listWeek,timeGridDay'
+                right: 'listWeek,timeGridDay' 
             },
-            googleCalendarApiKey: null,
+            // ❌ 削除: この行は削除
+            // googleCalendarApiKey: null, 
             eventSources: [],
             eventSourceFailure: function (error) {
                 console.error('カレンダーの読み込みに失敗しました:', error);
@@ -34,10 +30,4 @@ function initializeFullCalendarWhenReady() {
         setTimeout(initializeFullCalendarWhenReady, 50);
     }
 }
-
-window.onload = function() {
-    initializeFullCalendarWhenReady();
-};
-
-// ... (initializeGis および loadCalendarEvents 関数は、この状態では機能しませんが、コードの整合性のため維持します。)
-// ... (window.initializeGis = initializeGis; も維持します)
+// ... (関数と window.onload はそのまま維持) ...
