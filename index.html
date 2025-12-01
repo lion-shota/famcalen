@@ -54,7 +54,7 @@
         // 【重要】設定が必要な箇所
         // ==========================================================
         // 🚨 YOUR_CLIENT_ID: GCPで取得したOAuthクライアントID
-        const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com'; 
+        const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com'; // 例: 376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com
         
         // 📅 YOUR_CALENDAR_ID: アクセスしたい非公開カレンダーの完全なID（@以降も含む）
         const CALENDAR_ID = 'family00380647251029661395@group.calendar.google.com'; 
@@ -66,31 +66,35 @@
         let calendar = null;
         let accessToken = null;
 
-        // ✅ 修正点: window.onload を使用し、全ての外部JSファイルのロード完了を待つ
+        // ✅ 修正点: window.onload + setTimeout で初期化タイミングの問題を解消
         window.onload = function() {
-            var calendarEl = document.getElementById('calendar');
+            // FullCalendarの初期化を少し遅延させ、確実に全ての外部ファイルが処理されるのを待つ
+            setTimeout(function() {
+                var calendarEl = document.getElementById('calendar');
 
-            // FullCalendarの初期設定
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'ja',
-                
-                // timeGridはコアに含まれるため、dayGridとgoogleCalendarプラグインを指定
-                plugins: [ 'dayGrid', 'googleCalendar' ], 
-                
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                },
-                googleCalendarApiKey: null, // OAuth認証のためAPIキーは使用しない
-                eventSources: [], // 認証成功時に設定される
-                
-                eventSourceFailure: function(error) {
-                    console.error('カレンダーの読み込みに失敗しました:', error);
-                    alert('カレンダーの読み込みに失敗しました。アクセス権限または認証トークンを確認してください。');
-                }
-            });
+                // FullCalendarの初期設定
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'ja',
+                    
+                    // dayGridとgoogleCalendarプラグインを指定
+                    plugins: [ 'dayGrid', 'googleCalendar' ], 
+                    
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    googleCalendarApiKey: null, // OAuth認証のためAPIキーは使用しない
+                    eventSources: [], // 認証成功時に設定される
+                    
+                    eventSourceFailure: function(error) {
+                        console.error('カレンダーの読み込みに失敗しました:', error);
+                        // Networkタブで403が出ている場合はカレンダーIDまたはアクセス権限を要確認
+                        alert('カレンダーの読み込みに失敗しました。アクセス権限または認証トークンを確認してください。');
+                    }
+                });
+            }, 50); // 50ミリ秒遅延
         };
         
         // 認証フローの開始 (ユーザーがボタンを押したときに実行される)
@@ -103,7 +107,7 @@
                 callback: (tokenResponse) => {
                     if (tokenResponse.error !== undefined) {
                         console.error('認証エラー:', tokenResponse);
-                        alert('認証に失敗しました。クライアントIDやリダイレクトURLの設定を確認してください。');
+                        alert('認証に失敗しました。GCPのクライアントIDとリダイレクトURLの設定を確認してください。');
                         return;
                     }
                     // トークンを取得できたらカレンダーを読み込む
@@ -115,7 +119,7 @@
 
         // アクセストークンを使ってFullCalendarにデータを設定し、表示する
         function loadCalendarEvents(token) {
-            // window.onload で初期化されるのを待つ
+            // FullCalendarが初期化されるのを待つ（setTimeoutで遅延させているため）
             if (!calendar) {
                  // まだ FullCalendar が初期化されていなければ、少し待って再試行
                  setTimeout(() => loadCalendarEvents(token), 100);
