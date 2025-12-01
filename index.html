@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Googleカレンダー連携</title>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+    <style>
+        /* カレンダー本体のスタイル */
+        #calendar {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+    </style>
+</head>
+<body>
+    <div id='calendar'></div>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6.1.10/index.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js'></script>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        // --- 設定 ---
+        // 1. カレンダーの初期表示ビュー
+        initialView: 'dayGridMonth',
+
+        // 2. 日本語に設定
+        locale: 'ja',
+
+        // 3. 使用するプラグインの指定 (Google Calendar連携に必須)
+        plugins: [ 'dayGrid', 'googleCalendar' ], 
+
+        // 4. 【重要】APIキーの設定
+        googleCalendarApiKey: 'AIzaSyAU2Xa37tz6hapnYOC8TRbBN8ym2a-fO_A',
+
+        // 5. 【重要】表示するカレンダーの設定 (feeds)
+        // ここで指定したカレンダーIDの予定が自動で読み込まれます
+        eventSources: [
+            {
+                googleCalendarId: 'family00380647251029661395',
+                className: 'gcal-event' // スタイル調整用のクラス名
+            }
+        ]
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+</html>
