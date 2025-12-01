@@ -1,3 +1,5 @@
+// js/calendar_init.js の内容
+
 // ==========================================================
 // 【重要】設定が必要な箇所
 // ==========================================================
@@ -8,10 +10,6 @@ const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
 let calendar = null;
 let accessToken = null;
-
-// ==========================================================
-// 🚨 修正点: 関数定義をイベントリスナー設定より前に配置
-// ==========================================================
 
 function initializeGis() {
     google.accounts.oauth2.initTokenClient({
@@ -52,19 +50,21 @@ function loadCalendarEvents(token) {
 }
 
 
-// FullCalendarが利用可能になるまで待機し、初期化を行う関数
 function initializeFullCalendarWhenReady() {
     if (typeof FullCalendar !== 'undefined') {
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
+            // ✅ 修正点: 初期ビューをList形式に切り替え (コア機能)
             initialView: 'listWeek', 
             locale: 'ja',
+            // DayGridを削除したため、Google Calendarプラグインのみに限定
             plugins: ['googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'listWeek,timeGridDay'
+                // ✅ 修正点: DayGridMonthを削除し、List/TimeGridに限定
+                right: 'listWeek,timeGridDay' 
             },
             googleCalendarApiKey: null,
             eventSources: [],
@@ -80,19 +80,20 @@ function initializeFullCalendarWhenReady() {
     }
 }
 
+// ==========================================================
+// イベントリスナー設定
+// ==========================================================
 
-// ==========================================================
-// 🚨 修正点: DOMContentLoaded でボタンへのイベントリスナーを設定
-// ==========================================================
-// window.onload と initializeGis の定義が全て完了した後に実行される
+// window.onload で DOM構造の準備が完了してからチェックを開始
+window.onload = function() {
+    initializeFullCalendarWhenReady();
+};
+
+// DOMContentLoaded でボタンへのイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
     // initializeGis 関数を直接呼び出すよう、イベントリスナーを設定
     document.getElementById('auth-button').addEventListener('click', initializeGis);
 });
 
-window.onload = function() {
-    initializeFullCalendarWhenReady();
-};
-
-// HTMLの onclick 属性からの呼び出しのためにグローバルに公開
+// ボタンからの呼び出しを可能にする
 window.initializeGis = initializeGis;
