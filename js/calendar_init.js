@@ -1,5 +1,3 @@
-// js/calendar_init.js の内容
-
 // ==========================================================
 // 【重要】設定が必要な箇所
 // ==========================================================
@@ -49,22 +47,20 @@ function loadCalendarEvents(token) {
     calendar.render();
 }
 
-
+// FullCalendarが利用可能になるまで待機し、初期化を行う関数 (V5でも利用可能チェックは維持)
 function initializeFullCalendarWhenReady() {
     if (typeof FullCalendar !== 'undefined') {
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-            // ✅ 修正点: 初期ビューをList形式に切り替え (コア機能)
-            initialView: 'listWeek', 
+            initialView: 'dayGridMonth', 
             locale: 'ja',
-            // DayGridを削除したため、Google Calendarプラグインのみに限定
-            plugins: ['googleCalendar'], 
+            // 【修正】V5形式のプラグイン名を指定
+            plugins: ['dayGrid', 'googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                // ✅ 修正点: DayGridMonthを削除し、List/TimeGridに限定
-                right: 'listWeek,timeGridDay' 
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             googleCalendarApiKey: null,
             eventSources: [],
@@ -80,10 +76,6 @@ function initializeFullCalendarWhenReady() {
     }
 }
 
-// ==========================================================
-// イベントリスナー設定
-// ==========================================================
-
 // window.onload で DOM構造の準備が完了してからチェックを開始
 window.onload = function() {
     initializeFullCalendarWhenReady();
@@ -91,9 +83,8 @@ window.onload = function() {
 
 // DOMContentLoaded でボタンへのイベントリスナーを設定
 document.addEventListener('DOMContentLoaded', function() {
-    // initializeGis 関数を直接呼び出すよう、イベントリスナーを設定
     document.getElementById('auth-button').addEventListener('click', initializeGis);
 });
 
-// ボタンからの呼び出しを可能にする
+// ボタンからの呼び出しのためにグローバルに公開
 window.initializeGis = initializeGis;
