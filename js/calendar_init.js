@@ -22,7 +22,7 @@ function initializeFullCalendarWhenReady() {
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             locale: 'ja',
-            // ここでエラーが出ないかを確認
+            // DayGridプラグインが読み込まれていることを前提とする
             plugins: ['dayGrid', 'googleCalendar'],
             headerToolbar: {
                 left: 'prev,next today',
