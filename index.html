@@ -12,27 +12,33 @@
         #calendar {
             max-width: 900px;
             margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
         }
-        /* Googleのログインボタンのスタイルを調整 (必須ではないが推奨) */
-        .g_id_signin {
-            display: block;
-            margin: 10px auto;
-            width: 200px; /* 必要に応じてサイズ調整 */
+        #auth-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4285F4; /* Google Blue */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        #auth-button:hover {
+            background-color: #357ae8;
         }
     </style>
 </head>
 <body>
     
     <div id="auth-status" style="text-align: center; margin-bottom: 20px;">
-        <p id="status-message">Googleカレンダーの予定を表示するにはログインしてください。</p>
+        <p id="status-message">非公開カレンダーの予定を表示するには、Googleアカウントでログインしてアクセスを許可してください。</p>
         
-        <div id="g_id_onload"
-             data-client_id="YOUR_CLIENT_ID" 
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-callback="handleCredentialResponse">
-        </div>
+        <button id="auth-button" onclick="initializeGis()">
+            Googleアカウントで予定を読み込む
+        </button>
     </div>
     
     <div id='calendar' style="display: none;"></div>
@@ -47,10 +53,10 @@
         // ==========================================================
         // 【重要】設定が必要な箇所
         // ==========================================================
-        // 🚨 ステップ1で取得したOAuthクライアントIDに置き換えてください。
+        // 🚨 YOUR_CLIENT_ID を、GCPで取得したOAuthクライアントIDに置き換えてください。
         const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com'; 
         
-        // 📅 表示したいGoogleカレンダーID（通常はあなたのメールアドレス）に置き換えてください。
+        // 📅 YOUR_CALENDAR_ID を、表示したいGoogleカレンダーID（非公開カレンダーのメールアドレスなど）に置き換えてください。
         const CALENDAR_ID = 'family00380647251029661395';
         
         // 🔒 必要なスコープ (カレンダーの読み取り専用アクセスを要求)
@@ -61,9 +67,9 @@
         let accessToken = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // FullCalendarの初期設定（認証情報なしではまだ読み込まない）
             var calendarEl = document.getElementById('calendar');
 
+            // FullCalendarの初期設定
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'ja',
@@ -73,52 +79,42 @@
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
-                
-                // APIキーは使わず、OAuthトークンでアクセスします
-                googleCalendarApiKey: null,
-                
-                // eventSourcesは認証成功時に動的に設定します
+                googleCalendarApiKey: null, // OAuth認証のためAPIキーは使用しない
                 eventSources: [], 
                 
-                // 認証失敗時のためのエラーハンドリング
                 eventSourceFailure: function(error) {
                     console.error('カレンダーの読み込みに失敗しました:', error);
                     alert('カレンダーの読み込みに失敗しました。認証トークンが期限切れの可能性があります。再度ログインしてください。');
                 }
             });
+            // DOMContentLoaded時に calendar.render() は呼ばず、認証成功後に呼び出す。
         });
         
-        // 認証フローの開始
+        // 認証フローの開始 (ユーザーがボタンを押したときに実行される)
         function initializeGis() {
+            // トークンクライアントの初期化とアクセストークンのリクエスト
             google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPE,
+                // トークン取得が完了したときのコールバック
                 callback: (tokenResponse) => {
                     if (tokenResponse.error !== undefined) {
                         console.error('認証エラー:', tokenResponse);
+                        alert('認証に失敗しました。クライアントIDやリダイレクトURLの設定を確認してください。');
                         return;
                     }
                     // トークンを取得できたらカレンダーを読み込む
                     accessToken = tokenResponse.access_token;
                     loadCalendarEvents(accessToken);
                 },
-            }).requestAccessToken();
-        }
-
-        // ログインボタンのコールバック関数 (ユーザーが許可した後)
-        function handleCredentialResponse(response) {
-            // FullCalendarがアクセストークンを認識できるようにローカル変数に保存
-            accessToken = response.access_token;
-            
-            // カレンダーを読み込む
-            loadCalendarEvents(accessToken);
+            }).requestAccessToken(); // 認証ポップアップを表示し、トークン取得リクエストを送信
         }
 
         // アクセストークンを使ってFullCalendarにデータを設定し、表示する
         function loadCalendarEvents(token) {
             if (!calendar) return;
 
-            // ステータス表示を更新
+            // ステータス表示を更新し、UIを切り替える
             document.getElementById('status-message').textContent = '認証成功！カレンダーを読み込み中です...';
             document.getElementById('auth-status').style.display = 'none'; // ログインUIを非表示
             document.getElementById('calendar').style.display = 'block'; // カレンダーを表示
@@ -127,8 +123,7 @@
             calendar.setOption('eventSources', [
                 {
                     googleCalendarId: CALENDAR_ID,
-                    // 取得したアクセストークンを設定
-                    // FullCalendarはこのトークンを使ってAPIリクエストを送ります
+                    // 取得したアクセストークンをAuthorizationヘッダーに設定
                     headers: {
                         Authorization: 'Bearer ' + token
                     }
@@ -139,10 +134,8 @@
             calendar.render();
         }
         
-        // Googleの認証をトリガーする関数をグローバルに公開 (GISライブラリの要件)
-        window.handleCredentialResponse = handleCredentialResponse;
-        window.initializeGis = initializeGis;
-        
+        // Google Identity Services (GIS) の要件を満たすため、グローバルに公開
+        window.initializeGis = initializeGis; 
     </script>
 </body>
 </html>
