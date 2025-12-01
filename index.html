@@ -43,110 +43,85 @@
     
     <div id='calendar' style="display: none;"></div>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
-    
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar/index.global.min.js'></script>
-    
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar/index.global.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js' defer></script>
 
     <script>
         // ==========================================================
-        // 【重要】設定が必要な箇所
+        // 【重要】設定が必要な箇所 (あなたの設定値を維持)
         // ==========================================================
-        // 🚨 YOUR_CLIENT_ID: GCPで取得したOAuthクライアントID
-        const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com'; // 例: 376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com
-        
-        // 📅 YOUR_CALENDAR_ID: アクセスしたい非公開カレンダーの完全なID（@以降も含む）
+        const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com';
         const CALENDAR_ID = 'family00380647251029661395@group.calendar.google.com'; 
-        
-        // 🔒 スコープ (カレンダーの読み取り専用アクセスを要求)
         const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
         // ==========================================================
 
         let calendar = null;
         let accessToken = null;
 
-        // ✅ 修正点: window.onload + setTimeout で初期化タイミングの問題を解消
+        // window.onload + setTimeout のロジックは維持します
         window.onload = function() {
-            // FullCalendarの初期化を少し遅延させ、確実に全ての外部ファイルが処理されるのを待つ
             setTimeout(function() {
                 var calendarEl = document.getElementById('calendar');
 
-                // FullCalendarの初期設定
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
                     locale: 'ja',
-                    
-                    // dayGridとgoogleCalendarプラグインを指定
                     plugins: [ 'dayGrid', 'googleCalendar' ], 
-                    
                     headerToolbar: {
                         left: 'prev,next today',
                         center: 'title',
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     },
-                    googleCalendarApiKey: null, // OAuth認証のためAPIキーは使用しない
-                    eventSources: [], // 認証成功時に設定される
+                    googleCalendarApiKey: null,
+                    eventSources: [],
                     
                     eventSourceFailure: function(error) {
                         console.error('カレンダーの読み込みに失敗しました:', error);
-                        // Networkタブで403が出ている場合はカレンダーIDまたはアクセス権限を要確認
                         alert('カレンダーの読み込みに失敗しました。アクセス権限または認証トークンを確認してください。');
                     }
                 });
-            }, 50); // 50ミリ秒遅延
+            }, 50);
         };
         
-        // 認証フローの開始 (ユーザーがボタンを押したときに実行される)
         function initializeGis() {
-            // トークンクライアントの初期化とアクセストークンのリクエスト
             google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPE,
-                // トークン取得が完了したときのコールバック
                 callback: (tokenResponse) => {
                     if (tokenResponse.error !== undefined) {
                         console.error('認証エラー:', tokenResponse);
                         alert('認証に失敗しました。GCPのクライアントIDとリダイレクトURLの設定を確認してください。');
                         return;
                     }
-                    // トークンを取得できたらカレンダーを読み込む
                     accessToken = tokenResponse.access_token;
                     loadCalendarEvents(accessToken);
                 },
-            }).requestAccessToken(); // 認証ポップアップを表示し、トークン取得リクエストを送信
+            }).requestAccessToken();
         }
 
-        // アクセストークンを使ってFullCalendarにデータを設定し、表示する
         function loadCalendarEvents(token) {
-            // FullCalendarが初期化されるのを待つ（setTimeoutで遅延させているため）
             if (!calendar) {
-                 // まだ FullCalendar が初期化されていなければ、少し待って再試行
                  setTimeout(() => loadCalendarEvents(token), 100);
                  return;
             }
 
-            // ステータス表示を更新し、UIを切り替える
             document.getElementById('status-message').textContent = '認証成功！カレンダーを読み込み中です...';
-            document.getElementById('auth-status').style.display = 'none'; // ログインUIを非表示
-            document.getElementById('calendar').style.display = 'block'; // カレンダーを表示
+            document.getElementById('auth-status').style.display = 'none';
+            document.getElementById('calendar').style.display = 'block';
 
-            // FullCalendarのイベントソースにトークンとカレンダーIDを設定
             calendar.setOption('eventSources', [
                 {
                     googleCalendarId: CALENDAR_ID,
-                    // 取得したアクセストークンをAuthorizationヘッダーに設定
                     headers: {
                         Authorization: 'Bearer ' + token
                     }
                 }
             ]);
 
-            // カレンダーを再描画してデータを取得
             calendar.render();
         }
         
-        // Google Identity Services (GIS) の要件を満たすため、グローバルに公開
         window.initializeGis = initializeGis; 
     </script>
 </body>
