@@ -2,33 +2,14 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title>１２３OAuth認証版 Googleカレンダー連携</title>
+    <title>OAuth認証版 Googleカレンダー連携</title>
 
     <link href='./css/main.min.css' rel='stylesheet' />
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        #calendar {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        #auth-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        #auth-button:hover {
-            background-color: #357ae8;
-        }
+        /* ... スタイル省略 ... */
     </style>
 </head>
 <body>
@@ -43,14 +24,12 @@
     
     <div id='calendar' style="display: none;"></div>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js' defer type="module"></script> 
-    
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@5/main.min.js' defer type="module"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5/main.min.js' defer></script> 
 
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@5/main.min.js' defer type="module"></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@5/main.min.js' defer></script>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5/locales-all.min.js' defer type="module"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5/locales-all.min.js' defer></script>
 
-    <script src='./js/calendar_init.js' defer type="module"></script> 
+    <script src='./js/calendar_init.js' defer></script> 
 </body>
 </html>
