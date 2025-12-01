@@ -18,9 +18,10 @@ function initializeFullCalendarWhenReady() {
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth', // ★ここでは一旦維持（DayGridなしで動くかテスト）
+            // DayGridプラグインがないため、エラーを避けるためにビューをデフォルトのlistに切り替えることを推奨
+            initialView: 'dayGridMonth', // 一旦、DayGridがコア機能として残っている可能性に賭け維持
             locale: 'ja',
-            // 【修正】DayGridプラグインの参照を削除
+            // 【修正】DayGridプラグインを削除
             plugins: ['googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
