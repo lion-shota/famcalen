@@ -14,16 +14,14 @@ let accessToken = null;
 
 // FullCalendarが利用可能になるまで待機し、初期化を行う関数
 function initializeFullCalendarWhenReady() {
-    // FullCalendarオブジェクトが定義されているかを確認
     if (typeof FullCalendar !== 'undefined') {
-        // 利用可能になったら初期化を起動
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
+            initialView: 'dayGridMonth', // ★ここでは一旦維持（DayGridなしで動くかテスト）
             locale: 'ja',
-            // DayGridプラグインが読み込まれていることを前提とする
-            plugins: ['dayGrid', 'googleCalendar'],
+            // 【修正】DayGridプラグインの参照を削除
+            plugins: ['googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
@@ -39,7 +37,6 @@ function initializeFullCalendarWhenReady() {
         
         console.log("FullCalendar 初期化成功！"); 
     } else {
-        // まだ利用可能でなければ、短い間隔で再チェック (ポーリング)
         setTimeout(initializeFullCalendarWhenReady, 50);
     }
 }
@@ -67,7 +64,6 @@ function initializeGis() {
 
 function loadCalendarEvents(token) {
     if (!calendar) {
-         // FullCalendarの初期化が終わるのを待つ
          setTimeout(() => loadCalendarEvents(token), 100);
          return;
     }
