@@ -10,6 +10,7 @@ let calendar = null;
 let accessToken = null;
 
 // 1. 関数定義 (ReferenceError対策として最優先で配置)
+
 function initializeGis() {
     google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
@@ -48,7 +49,6 @@ function loadCalendarEvents(token) {
     calendar.render();
 }
 
-// FullCalendarの初期化関数
 function initializeFullCalendarWhenReady() {
     if (typeof FullCalendar !== 'undefined') {
         const calendarEl = document.getElementById('calendar');
@@ -56,7 +56,6 @@ function initializeFullCalendarWhenReady() {
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth', 
             locale: 'ja',
-            // V5形式のプラグイン名で初期化
             plugins: ['dayGrid', 'googleCalendar'], 
             headerToolbar: {
                 left: 'prev,next today',
@@ -86,9 +85,9 @@ window.onload = function() {
     // FullCalendarの初期化を開始
     initializeFullCalendarWhenReady();
 
-    // ボタンへのイベントリスナーを設定 (ReferenceError対策)
+    // DOMContentLoaded でボタンへのイベントリスナーを設定 (安全のため)
     document.getElementById('auth-button').addEventListener('click', initializeGis);
 };
 
-// HTMLの onclick 属性を削除したため、このグローバル公開は不要ですが、念のため維持します
+// 互換性のためグローバルに公開
 window.initializeGis = initializeGis;
