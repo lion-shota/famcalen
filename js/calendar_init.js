@@ -31,3 +31,8 @@ function initializeFullCalendarWhenReady() {
     }
 }
 // ... (関数と window.onload はそのまま維持) ...
+// ボタンからの呼び出しを可能にする
+window.initializeGis = initializeGis;
+
+// ✅ 修正箇所: DOMがロードされた後にイベントリスナーを設定する
+document.getElementById('auth-button').addEventListener('click', initializeGis);
