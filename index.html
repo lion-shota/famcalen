@@ -4,8 +4,8 @@
     <meta charset='utf-8' />
     <title>OAuth認証版 Googleカレンダー連携</title>
 
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.css' rel='stylesheet' />
-
+    <link href='https://unpkg.com/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
@@ -44,22 +44,29 @@
     <div id='calendar' style="display: none;"></div>
 
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js' defer></script>
+    
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6.1.10/index.global.min.js' defer></script>
+    
     <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js' defer></script>
 
     <script>
         // ==========================================================
         // 【重要】設定が必要な箇所 (あなたの設定値を維持)
         // ==========================================================
+        // 🚨 YOUR_CLIENT_ID: GCPで取得したOAuthクライアントID
         const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com';
+        
+        // 📅 YOUR_CALENDAR_ID: アクセスしたい非公開カレンダーの完全なID（@以降も含む）
         const CALENDAR_ID = 'it.is.shotaime@google.com'; 
+        
+        // 🔒 スコープ (カレンダーの読み取り専用アクセスを要求)
         const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
         // ==========================================================
 
         let calendar = null;
         let accessToken = null;
 
-        // window.onload + setTimeout のロジックは維持します
+        // window.onload + setTimeout で初期化タイミングの問題を解消
         window.onload = function() {
             setTimeout(function() {
                 var calendarEl = document.getElementById('calendar');
