@@ -43,52 +43,55 @@
     
     <div id='calendar' style="display: none;"></div>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
     
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar@6.1.10/index.global.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/google-calendar/index.global.min.js'></script>
     
-    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js' defer></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/ja.global.min.js'></script>
 
     <script>
         // ==========================================================
         // 【重要】設定が必要な箇所
         // ==========================================================
-        // 🚨 YOUR_CLIENT_ID を、GCPで取得したOAuthクライアントIDに置き換えてください。
+        // 🚨 YOUR_CLIENT_ID: GCPで取得したOAuthクライアントID
         const CLIENT_ID = '376485449787-sk76t7tgmigbmqgm4h2vkkgr72hq1kl5.apps.googleusercontent.com'; 
         
-        // 📅 YOUR_CALENDAR_ID を、表示したいGoogleカレンダーID（非公開カレンダーのメールアドレスなど）に置き換えてください。
-        const CALENDAR_ID = 'it.is.shotaime@gmail.com';
+        // 📅 YOUR_CALENDAR_ID: アクセスしたい非公開カレンダーの完全なID（@以降も含む）
+        const CALENDAR_ID = 'family00380647251029661395@group.calendar.google.com'; 
         
-        // 🔒 必要なスコープ (カレンダーの読み取り専用アクセスを要求)
+        // 🔒 スコープ (カレンダーの読み取り専用アクセスを要求)
         const SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
         // ==========================================================
 
         let calendar = null;
         let accessToken = null;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        // ✅ 修正点: window.onload を使用し、全ての外部JSファイルのロード完了を待つ
+        window.onload = function() {
             var calendarEl = document.getElementById('calendar');
 
             // FullCalendarの初期設定
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'ja',
-                plugins: [ 'dayGrid', 'timeGrid', 'googleCalendar' ], 
+                
+                // timeGridはコアに含まれるため、dayGridとgoogleCalendarプラグインを指定
+                plugins: [ 'dayGrid', 'googleCalendar' ], 
+                
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 googleCalendarApiKey: null, // OAuth認証のためAPIキーは使用しない
-                eventSources: [], 
+                eventSources: [], // 認証成功時に設定される
                 
                 eventSourceFailure: function(error) {
                     console.error('カレンダーの読み込みに失敗しました:', error);
-                    alert('カレンダーの読み込みに失敗しました。認証トークンが期限切れの可能性があります。再度ログインしてください。');
+                    alert('カレンダーの読み込みに失敗しました。アクセス権限または認証トークンを確認してください。');
                 }
             });
-            // DOMContentLoaded時に calendar.render() は呼ばず、認証成功後に呼び出す。
-        });
+        };
         
         // 認証フローの開始 (ユーザーがボタンを押したときに実行される)
         function initializeGis() {
@@ -112,7 +115,12 @@
 
         // アクセストークンを使ってFullCalendarにデータを設定し、表示する
         function loadCalendarEvents(token) {
-            if (!calendar) return;
+            // window.onload で初期化されるのを待つ
+            if (!calendar) {
+                 // まだ FullCalendar が初期化されていなければ、少し待って再試行
+                 setTimeout(() => loadCalendarEvents(token), 100);
+                 return;
+            }
 
             // ステータス表示を更新し、UIを切り替える
             document.getElementById('status-message').textContent = '認証成功！カレンダーを読み込み中です...';
